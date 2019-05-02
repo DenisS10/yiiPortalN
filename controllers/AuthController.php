@@ -38,6 +38,7 @@ class AuthController extends Controller
         // echo Yii::$app->security->generatePasswordHash('das');
     }
 
+
     /**
      * @return string
      */
@@ -50,7 +51,11 @@ class AuthController extends Controller
             if (Yii::$app->user->isGuest) {
                 $user = Users::findByLogin($model->login);
                 if ($user) {
-                    if (Yii::$app->security->validatePassword($model->password, $user->password))
+                    if($user->is_notary) { /* TODO: Сделать отдельный интерфейс для нотариусов */
+                        if (Yii::$app->security->validatePassword($model->password, $user->password))
+                            Yii::$app->user->login($user);
+                    }
+                    else
                         Yii::$app->user->login($user);
 //                    if (Yii::$app->session->isActive) {
 //                        Yii::$app->session->open();
