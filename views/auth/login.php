@@ -1,4 +1,5 @@
 <?php
+/** @var $model */
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 

@@ -47,123 +47,120 @@ class AuthController extends Controller
         // if (!Yii::$app->session->get('auth') || Yii::$app->session->get('auth') != 'ok')
         //$this->redirect('login');
         $model = new LoginForm();
+
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            if (Yii::$app->user->isGuest) {
-                $user = Users::findByLogin($model->login);
-                if ($user) {
-                    if($user->is_notary) { /* TODO: Сделать отдельный интерфейс для нотариусов */
-                        if (Yii::$app->security->validatePassword($model->password, $user->password))
-                            Yii::$app->user->login($user);
-                    }
-                    else
-                        Yii::$app->user->login($user);
-//                    if (Yii::$app->session->isActive) {
-//                        Yii::$app->session->open();
-//                        Yii::$app->session->set('id', $user->id);
-//                        Yii::$app->session->set('auth', 'ok');
-//                    }
-                    $this->redirect("/tasks/view");
-                }
+            $user = Users::findByLogin($model->login);
+            if (!$user)
+                exit();
+            if ($user->is_notary == 1) { /* TODO: Сделать отдельный интерфейс для нотариусов */
+                if (Yii::$app->security->validatePassword($model->password, $user->password))
+                    Yii::$app->user->login($user);
+                $this->redirect("/tasks/view");
+            } else {
+                Yii::$app->user->login($user);
+                $this->redirect("/tasks/new");
             }
         }
-
-
         return $this->render('login', [
             'model' => $model,
         ]);
     }
 
-    /**
-     * @return string
-     */
-    public function actionSignup()
-    {
+/**
+ * @return string
+ */
+public
+function actionSignup()
+{
 
-        $model = new SignupForm();
+    $model = new SignupForm();
 
-        $newUser = new Users();
-        if ($model->load(Yii::$app->request->post())) {
+    $newUser = new Users();
+    if ($model->load(Yii::$app->request->post())) {
 
-            if ($model->validate()) {
+        if ($model->validate()) {
 
-                if ($model->password === $model->passwordReload) {
+            if ($model->password === $model->passwordReload) {
 
 
-                    $_password = password_hash($model->password, PASSWORD_DEFAULT);
-                    $newUser->login = $model->username;
-                    $newUser->mod_time = 0;
-                    $newUser->password = $_password;
-                    $newUser->first_time = time();
-
-                    $newUser->save();
-                    $this->refresh();
-                    // $newUser->errors;
-                }
+                $_password = password_hash($model->password, PASSWORD_DEFAULT);
+                $newUser->login = $model->username;
+                $newUser->modify_date = 0;
+                $newUser->password = $_password;
+                $newUser->creation_date = time();
+                //$checkNotary = Yii::$app->request->post();
+                $newUser->is_notary = $model->isNotary;
+                $newUser->save();
+                $this->refresh();
+                // $newUser->errors;
             }
-
-
         }
-        return $this->render('signup', [
-            'model' => $model,
-        ]);
+
 
     }
+    return $this->render('signup', [
+        'model' => $model,
+    ]);
 
-    public function actionMyaccount()
-    {
+}
 
-        // if (!Yii::$app->session->get('auth') || Yii::$app->session->get('auth') != 'ok') ;
+public
+function actionMyaccount()
+{
+
+    // if (!Yii::$app->session->get('auth') || Yii::$app->session->get('auth') != 'ok') ;
 //        if (Yii::$app->user->isGuest)
 //            $this->redirect('login');
 
-        $currUser = Users::getUserBySessionId();
-        $model = new MyAccountForm();
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+    $currUser = Users::getUserBySessionId();
+    $model = new MyAccountForm();
+    if ($model->load(Yii::$app->request->post()) && $model->validate()) {
 
-            if (password_verify($model->oldPass, $currUser->password) == true) {
-                if ($model->newPass === $model->repeatNewPass) {
-                    $_password = password_hash($model->repeatNewPass, PASSWORD_DEFAULT);
-                    $currUser->password = $_password;
-                    $currUser->save();
-                    //echo 'password = '.$currUser->password;
-                }
-
+        if (password_verify($model->oldPass, $currUser->password) == true) {
+            if ($model->newPass === $model->repeatNewPass) {
+                $_password = password_hash($model->repeatNewPass, PASSWORD_DEFAULT);
+                $currUser->password = $_password;
+                $currUser->save();
+                //echo 'password = '.$currUser->password;
             }
-        }
-        return $this->render('myAccount', [
-            'model' => $model,
-        ]);
-    }
 
-    public function actionLogout()
-    {
+        }
+    }
+    return $this->render('myAccount', [
+        'model' => $model,
+    ]);
+}
+
+public
+function actionLogout()
+{
 //        if (Yii::$app->session->get('auth') == 'ok' || Yii::$app->session->get('auth') != 'ok')
 //            $this->redirect('login');
-        Yii::$app->user->logout();
-        $this->redirect('login');
+    Yii::$app->user->logout();
+    $this->redirect('login');
 
+}
+/*    public function getTasks()
+    {
+        return $this->hasMany(Task::className(), ['user_id' => 'id']);
     }
-    /*    public function getTasks()
-        {
-            return $this->hasMany(Task::className(), ['user_id' => 'id']);
-        }
 
-        public static function getPassById($id)
-        {
-            return Users::find()->andWhere(['id' => $id])->all()[0]->password;
-        }
-        public static function getLoginById($id)
-        {
-            return Users::find()->andWhere(['id' => $id])->all()[0]->login;
-        }
-        public static function findByLogin($login)
-        {
-            return Users::find()->andWhere(['login' => $login])->all()[0];
-        }
+    public static function getPassById($id)
+    {
+        return Users::find()->andWhere(['id' => $id])->all()[0]->password;
+    }
+    public static function getLoginById($id)
+    {
+        return Users::find()->andWhere(['id' => $id])->all()[0]->login;
+    }
+    public static function findByLogin($login)
+    {
+        return Users::find()->andWhere(['login' => $login])->all()[0];
+    }
 
-        public static function getUserBySessionId()
-        {
-            $id = Yii::$app->session->get('id');
-            return Users::find()->andWhere(['id' => $id])->one();
-        }*/
+    public static function getUserBySessionId()
+    {
+        $id = Yii::$app->session->get('id');
+        return Users::find()->andWhere(['id' => $id])->one();
+    }*/
 }

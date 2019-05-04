@@ -10,7 +10,7 @@ use yii\web\IdentityInterface;
  * This is the model class for table "users".
  *
  * @property int $id
- * @property int $login
+ * @property string $login
  * @property string $password
  * @property int $creation_date
  * @property int $modify_date
@@ -65,9 +65,11 @@ class Users extends ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['login', 'password', 'creation_date', 'modify_date', 'is_notary'], 'required'],
-            [['login', 'creation_date', 'modify_date', 'is_notary'], 'integer'],
+            [['login', 'password', 'creation_date', 'modify_date','is_notary'], 'required'],
+            [['creation_date', 'modify_date', 'is_notary'], 'integer'],
             [['password'], 'string', 'max' => 150],
+            [['login'], 'string', 'max' => 50],
+            [['is_notary'], 'integer','max' => 1],
         ];
     }
 
