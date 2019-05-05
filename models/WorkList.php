@@ -20,6 +20,7 @@ use Yii;
  * @property string $notary_name
  * @property int $is_accepted
  * @property string $extension
+ * @property int $is_deleted
  *
  * @property Users $user
  */
@@ -39,8 +40,8 @@ class WorkList extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'file_key', 'file_link', 'name', 'sur_name', 'price', 'creation_date', 'modify_date', 'deadline_date', 'notary_name', 'is_accepted', 'extension'], 'required'],
-            [['user_id', 'creation_date', 'modify_date', 'deadline_date', 'is_accepted'], 'integer'],
+            [['user_id', 'file_key', 'file_link', 'name', 'sur_name', 'price', 'creation_date', 'modify_date', 'deadline_date', 'notary_name', 'is_accepted', 'extension', 'is_deleted'], 'required'],
+            [['user_id', 'creation_date', 'modify_date', 'deadline_date', 'is_accepted', 'is_deleted'], 'integer'],
             [['file_key', 'extension'], 'string', 'max' => 10],
             [['file_link'], 'string', 'max' => 250],
             [['name', 'sur_name', 'price', 'notary_name'], 'string', 'max' => 50],
@@ -67,6 +68,7 @@ class WorkList extends \yii\db\ActiveRecord
             'notary_name' => 'Notary Name',
             'is_accepted' => 'Is Accepted',
             'extension' => 'Extension',
+            'is_deleted' => 'Is Deleted',
         ];
     }
 
@@ -80,5 +82,11 @@ class WorkList extends \yii\db\ActiveRecord
     public static function getAllTasks()
     {
         return WorkList::find()->all();
+    }
+
+    public static function getTasksBySessionId()
+    {
+        $id = Yii::$app->session->get('__id');
+        return WorkList::find()->andWhere(['user_id' => $id])->all();
     }
 }

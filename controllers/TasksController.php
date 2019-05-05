@@ -70,8 +70,12 @@ class TasksController extends Controller
                     $newWork->file_link = $link;
                     $newWork->extension = $ext;
                     $newWork->is_accepted = 0;
-                    $newWork->notary_name = ' ';
+                    $newWork->notary_name = 'no notary';
+                    $newWork->is_deleted = 0;
                     $newWork->save();
+                    echo '<pre>';
+                    print_r($newWork->errors);
+                    exit();
                 }
             }
         }
@@ -119,8 +123,19 @@ class TasksController extends Controller
     {
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
-        $allTasks = WorkList::getAllTasks();
+        $clientTasks = WorkList::getAllTasks();
         return $this->render('viewclient', ['clientTasks' => $clientTasks]);
+    }
+
+    public function actionDelete()
+    {
+        if (Yii::$app->user->isGuest)
+            $this->redirect('/auth/login', 302);
+        $id = Yii::$app->request->get('id');
+        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+        $currTask->is_deleted = 1;
+        $currTask->save();
+        $this->redirect('clientview');
     }
 
     public function actionAccept()
