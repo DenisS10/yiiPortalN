@@ -95,4 +95,10 @@ class Users extends ActiveRecord implements IdentityInterface
     {
         return $this->hasMany(WorkList::className(), ['user_id' => 'id']);
     }
+
+    public static function getUserBySessionId()
+    {
+        $id=Yii::$app->session->get('__id');
+        return Users::find()->andWhere(['id' => $id]);
+    }
 }

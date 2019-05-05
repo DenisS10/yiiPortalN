@@ -10,7 +10,6 @@ namespace app\controllers;
 
 
 use app\models\LoginForm;
-
 use app\models\MyAccountForm;
 use app\models\SignupForm;
 use app\models\Users;
@@ -46,12 +45,15 @@ class AuthController extends Controller
     {
         // if (!Yii::$app->session->get('auth') || Yii::$app->session->get('auth') != 'ok')
         //$this->redirect('login');
+        if (Yii::$app->user->isGuest == false)
+            $this->redirect('/tasks/index');
         $model = new LoginForm();
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $user = Users::findByLogin($model->login);
             if (!$user)
                 exit();
+
             if ($user->is_notary == 1) { /* TODO: Сделать отдельный интерфейс для нотариусов */
                 if (Yii::$app->security->validatePassword($model->password, $user->password))
                     Yii::$app->user->login($user);
@@ -60,6 +62,7 @@ class AuthController extends Controller
                 Yii::$app->user->login($user);
                 $this->redirect("/tasks/new");
             }
+
         }
         return $this->render('login', [
             'model' => $model,
