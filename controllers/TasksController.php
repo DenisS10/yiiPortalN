@@ -32,7 +32,7 @@ class TasksController extends Controller
     {
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
-        $clientTasks = WorkList::getAllTasks();
+        $clientTasks = WorkList::getTasksBySessionId();
         return $this->render('viewclient', ['clientTasks' => $clientTasks]);
     }
 
