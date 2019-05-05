@@ -18,7 +18,7 @@ class createForm extends Model
     public $deadline;
     public $userFile;
     public $price;
-    public $needDocVerify;
+   // public $needDocVerify;
 
 
 
@@ -28,7 +28,7 @@ class createForm extends Model
             [['name', 'surName','deadline','price'], 'required','message' => 'Необходимо заполнить поле'],
             [['name','surName','price'],'string','max' => 50],
             [['deadline'], 'string','max' => 50],
-            [['userFile'], 'file', 'skipOnEmpty' => false,'extensions' => 'PDF, pdf',],
+            [['userFile'], 'file', 'skipOnEmpty' => true,'extensions' => 'PDF','maxFiles' => 5],
 
         ];
     }
