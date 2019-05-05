@@ -22,9 +22,7 @@
     <tbody>
     <?$i=0;
     foreach ($allTasks as $allTask) {
-        echo '<pre>';
-        print_r($allTask);
-        exit();
+
         $idDb = $allTasks[$i]->id;
         $i++;
         if($allTask->is_deleted == 0){

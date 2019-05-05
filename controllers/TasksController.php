@@ -134,6 +134,18 @@ class TasksController extends Controller
         $id = Yii::$app->request->get('id');
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
         $currTask->is_deleted = 1;
+        $currTask->is_accepted = 0;
+        $currTask->save();
+        $this->redirect('clientview');
+    }
+
+    public function actionRecover()
+    {
+        if (Yii::$app->user->isGuest)
+            $this->redirect('/auth/login', 302);
+        $id = Yii::$app->request->get('id');
+        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+        $currTask->is_deleted = 0;
         $currTask->save();
         $this->redirect('clientview');
     }

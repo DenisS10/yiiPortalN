@@ -34,7 +34,7 @@
             <td><?if($clientTask->is_deleted == 0){?>
                 <a href="delete?id=<?= $idDb ?>" class="btn btn-danger">Отозвать заказ</a>
                 <?}else{?>
-                <a href="delete?id=<?= $idDb ?>" class="btn btn-primary">Восстановить заказ</a>
+                <a href="recover?id=<?= $idDb ?>" class="btn btn-success">Восстановить заказ</a>
                 <?}?>
             </td>
             <td><? if ($clientTask->notary_name != 'no notary' && $clientTask->is_accepted == 1)
