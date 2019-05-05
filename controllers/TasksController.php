@@ -16,6 +16,9 @@ use yii\web\Controller;
 
 class TasksController extends Controller
 {
+    /**
+     * @return string
+     */
     public function actionIndex()
     {
         if (Yii::$app->user->isGuest)
@@ -25,18 +28,16 @@ class TasksController extends Controller
     }
 
 
+    /**
+     * @return string
+     */
     public function actionNew()
     {
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
-
-
         $model = new createForm();
-
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-
             if (isset($_FILES['createForm'])) {
-
                 $name = md5(time() . rand(1, 1000) . $_FILES['createForm']['name']['userFile']);
                 $key = $name[0] . $name[1] . $name[2] . $name[3] . $name[4] . $name[5] . $name[6] . $name[7];
                 // Yii::$app->session->open();
@@ -74,7 +75,6 @@ class TasksController extends Controller
                 }
             }
         }
-
         $model->name = '';
         $model->surName = '';
         $model->deadline = '';
@@ -82,31 +82,45 @@ class TasksController extends Controller
         return $this->render('create', ['model' => $model]);
     }
 
+    /**
+     * @param $key
+     * @return $this|\yii\web\Response
+     */
     public function actionDownload($key)
     {
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
         $saveFile = WorkList::find()->andWhere(['file_key' => $key])->one();
-        if ($saveFile != null) {
-            $pathOld = __DIR__ . '/' . $saveFile->file_link . '.' . $saveFile->extension;
-            $path = str_replace('\\', '/', $pathOld);
-            if (file_exists($path))
-                return Yii::$app->response->sendFile($path);
-            else {
-                $delNotExistsFile = WorkList::find()->andWhere(['file_key' => $key])->one();
-                $delNotExistsFile->delete();
-                return $this->redirect('/tasks/view');
-            }
+        if ($saveFile == null)
+            exit();
+        $pathOld = __DIR__ . '/' . $saveFile->file_link . '.' . $saveFile->extension;
+        $path = str_replace('\\', '/', $pathOld);
+        if (file_exists($path))
+            return Yii::$app->response->sendFile($path);
+        else {
+            $delNotExistsFile = WorkList::find()->andWhere(['file_key' => $key])->one();
+            $delNotExistsFile->delete();
+            return $this->redirect('/tasks/view');
         }
-
     }
 
+    /**
+     * @return string
+     */
     public function actionView()
     {
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
         $allTasks = WorkList::getAllTasks();
         return $this->render('viewall', ['allTasks' => $allTasks]);
+    }
+
+    public function actionClientview()
+    {
+        if (Yii::$app->user->isGuest)
+            $this->redirect('/auth/login', 302);
+        $allTasks = WorkList::getAllTasks();
+        return $this->render('viewclient', ['clientTasks' => $clientTasks]);
     }
 
     public function actionAccept()
