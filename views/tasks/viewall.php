@@ -35,8 +35,9 @@
         <td><?=$allTask->sur_name?></td>
         <td><?=$allTask->price?></td>
         <td>
-            <a href="/tasks/download/<?=$allTask->file_key?>"><?='Скачать'?></a>
-            <a href="/tasks/viewfile/<?=$allTask->file_key?>"><?='Просмотреть'?></a>
+            <a href="/tasks/download?key=<?=$allTask->file_key?>"><?='Скачать'?></a>
+<!--            <a href="/file/download?key=--><?//=$file->file_key?><!--">Download file</a>-->
+<!--            <a href="/tasks/viewfile/?id=--><?//=$allTask->file_key?><!--">--><?//='Просмотреть'?><!--</a>-->
         </td>
         <td>
             <?if($allTask->is_accepted == 0){?>
