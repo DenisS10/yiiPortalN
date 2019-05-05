@@ -39,7 +39,7 @@ class TasksController extends Controller
 
                 $name = md5(time() . rand(1, 1000) . $_FILES['createForm']['name']['userFile']);
                 $key = $name[0] . $name[1] . $name[2] . $name[3] . $name[4] . $name[5] . $name[6] . $name[7];
-               // Yii::$app->session->open();
+                // Yii::$app->session->open();
                 //Yii::$app->session->set('keyLink', $key);
                 $ext = explode('.', $_FILES['createForm']['name']['userFile']);
                 $ext = $ext[count($ext) - 1];
@@ -69,12 +69,10 @@ class TasksController extends Controller
                     $newWork->file_link = $link;
                     $newWork->extension = $ext;
                     $newWork->is_accepted = 0;
-                    $newWork->notary_name = Yii::$app->user->identity->login;
+                    $newWork->notary_name = ' ';
                     $newWork->save();
                 }
             }
-
-
         }
 
         $model->name = '';
@@ -83,12 +81,13 @@ class TasksController extends Controller
         $model->price = '';
         return $this->render('create', ['model' => $model]);
     }
+
     public function actionDownload($key)
     {
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
         $saveFile = WorkList::find()->andWhere(['file_key' => $key])->one();
-        if($saveFile != null) {
+        if ($saveFile != null) {
             $pathOld = __DIR__ . '/' . $saveFile->file_link . '.' . $saveFile->extension;
             $path = str_replace('\\', '/', $pathOld);
             if (file_exists($path))
@@ -99,7 +98,9 @@ class TasksController extends Controller
                 return $this->redirect('/tasks/view');
             }
         }
+
     }
+
     public function actionView()
     {
         if (Yii::$app->user->isGuest)
@@ -112,11 +113,23 @@ class TasksController extends Controller
     {
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
+        $id = Yii::$app->request->get('id');
+        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+        $currTask->is_accepted = 1;
+        $currTask->notary_name = Yii::$app->user->identity->login;
+        $currTask->save();
+        $this->redirect('/tasks/view');
     }
 
     public function actionDeny()
     {
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
+        $id = Yii::$app->request->get('id');
+        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+        $currTask->is_accepted = 0;
+        $currTask->notary_name = 'no notary';
+        $currTask->save();
+        $this->redirect('/tasks/view');
     }
 }
