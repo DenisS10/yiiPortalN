@@ -10,6 +10,7 @@ namespace app\controllers;
 
 
 use app\models\createForm;
+use app\models\Users;
 use app\models\WorkList;
 use Yii;
 use yii\web\Controller;
@@ -27,7 +28,86 @@ class TasksController extends Controller
         return $this->render('index');
     }
 
+    public function actionClientview()
+    {
+        if (Yii::$app->user->isGuest)
+            $this->redirect('/auth/login', 302);
+        $clientTasks = WorkList::getAllTasks();
+        return $this->render('viewclient', ['clientTasks' => $clientTasks]);
+    }
 
+    public function actionDelete()
+    {
+        if (Yii::$app->user->isGuest)
+            $this->redirect('/auth/login', 302);
+        $id = Yii::$app->request->get('id');
+        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+        $currTask->is_deleted = 1;
+        $currTask->is_accepted = 0;
+        $currTask->save();
+        $this->redirect('clientview');
+    }
+
+    public function actionRecover()
+    {
+        if (Yii::$app->user->isGuest)
+            $this->redirect('/auth/login', 302);
+        $id = Yii::$app->request->get('id');
+        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+        $currTask->is_deleted = 0;
+        $currTask->save();
+        $this->redirect('clientview');
+    }
+
+    /**
+     * @return string
+     */
+    public function actionView()
+    {
+        if (Yii::$app->user->isGuest)
+            $this->redirect('/auth/login', 302);
+        $user = Users::getUserBySessionId();
+        if ($user->is_notary != 1) {
+            return $this->redirect('/tasks/index');
+            //exit();
+        }
+        $allTasks = WorkList::getAllTasks();
+        return $this->render('viewall', ['allTasks' => $allTasks]);
+    }
+
+    public function actionAccept()
+    {
+        if (Yii::$app->user->isGuest)
+            $this->redirect('/auth/login', 302);        $user = Users::getUserBySessionId();
+        if ($user->is_notary != 1) {
+            return $this->redirect('/tasks/index');
+            //exit();
+        }
+        $id = Yii::$app->request->get('id');
+        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+        $currTask->is_accepted = 1;
+        $currTask->notary_name = Yii::$app->user->identity->login;
+        $currTask->save();
+        return $this->redirect('/tasks/view');
+    }
+
+    public function actionDeny() //отказ от работы
+    {
+        if (Yii::$app->user->isGuest)
+            $this->redirect('/auth/login', 302);
+        $user = Users::getUserBySessionId();
+        if ($user->is_notary != 1) {
+            return $this->redirect('/tasks/index');
+            //exit();
+        }
+        $id = Yii::$app->request->get('id');
+        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+        $currTask->is_accepted = 0;
+        $currTask->notary_name = 'no notary';
+        $currTask->save();
+        return $this->redirect('/tasks/view');
+
+    }
     /**
      * @return string
      */
@@ -108,69 +188,4 @@ class TasksController extends Controller
         }
     }
 
-    /**
-     * @return string
-     */
-    public function actionView()
-    {
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
-        $allTasks = WorkList::getAllTasks();
-        return $this->render('viewall', ['allTasks' => $allTasks]);
-    }
-
-    public function actionClientview()
-    {
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
-        $clientTasks = WorkList::getAllTasks();
-        return $this->render('viewclient', ['clientTasks' => $clientTasks]);
-    }
-
-    public function actionDelete()
-    {
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
-        $id = Yii::$app->request->get('id');
-        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
-        $currTask->is_deleted = 1;
-        $currTask->is_accepted = 0;
-        $currTask->save();
-        $this->redirect('clientview');
-    }
-
-    public function actionRecover()
-    {
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
-        $id = Yii::$app->request->get('id');
-        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
-        $currTask->is_deleted = 0;
-        $currTask->save();
-        $this->redirect('clientview');
-    }
-
-    public function actionAccept()
-    {
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
-        $id = Yii::$app->request->get('id');
-        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
-        $currTask->is_accepted = 1;
-        $currTask->notary_name = Yii::$app->user->identity->login;
-        $currTask->save();
-        $this->redirect('/tasks/view');
-    }
-
-    public function actionDeny()
-    {
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
-        $id = Yii::$app->request->get('id');
-        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
-        $currTask->is_accepted = 0;
-        $currTask->notary_name = 'no notary';
-        $currTask->save();
-        $this->redirect('/tasks/view');
-    }
 }

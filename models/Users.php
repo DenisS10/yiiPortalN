@@ -99,6 +99,8 @@ class Users extends ActiveRecord implements IdentityInterface
     public static function getUserBySessionId()
     {
         $id=Yii::$app->session->get('__id');
-        return Users::find()->andWhere(['id' => $id]);
+        return Users::find()->andWhere(['id' => $id])->one();
     }
+
+
 }
