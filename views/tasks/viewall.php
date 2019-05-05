@@ -42,7 +42,7 @@
             <?if($allTask->is_accepted == 0){?>
             <a href="accept?id=<?= $idDb ?>" class="btn btn-success">Принять заказ</a>
         <?}else{?>
-            <a href="deny?id=<?= $idDb ?>" class="btn btn-danger">Отказаться от заказа</a>
+            <a href="deny?id=<?= $idDb ?>" class="btn btn-danger">Отказаться</a>
             <?}?>
         </td>
         <td><?if($allTask->is_accepted == 1){?>
