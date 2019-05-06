@@ -122,13 +122,16 @@ class TasksController extends Controller
         $model = new createForm();
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if (isset($_FILES['createForm'])) {
-                $name = md5(time() . rand(1, 1000) . $_FILES['createForm']['name']['userFile']);
+                $pathToTmpFile = $_FILES['createForm']['tmp_name']['userFile'];
+                $pathToNameOfFile = $_FILES['createForm']['name']['userFile'];
+                $pathToUploadDir = '../uploads/';
+                $name = md5(time() . rand(1, 1000) . $pathToNameOfFile);
                 $key = $name[0] . $name[1] . $name[2] . $name[3] . $name[4] . $name[5] . $name[6] . $name[7];
                 // Yii::$app->session->open();
                 //Yii::$app->session->set('keyLink', $key);
-                $ext = explode('.', $_FILES['createForm']['name']['userFile']);
+                $ext = explode('.', $pathToNameOfFile);
                 $ext = $ext[count($ext) - 1];
-                $pathOld = '../uploads/' . $name[0] . '/' . $name[1] . '/';//;
+                $pathOld = $pathToUploadDir . $name[0] . '/' . $name[1] . '/';//;
                 $path = str_replace('\\', '/', $pathOld);
                 $link = $path . $name;
                 //$this->Files->uploadFile($link, $key, $ext);
@@ -139,7 +142,7 @@ class TasksController extends Controller
                     $this->redirect('new');
                     exit();
                 }
-                move_uploaded_file($_FILES['createForm']['tmp_name']['userFile'],
+                move_uploaded_file($pathToTmpFile,
                     $path . '/' . $name . '.' . $ext);
                 if (file_exists($path)) {
                     $newWork = new WorkList();

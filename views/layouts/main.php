@@ -40,6 +40,7 @@ AppAsset::register($this);
         'items' => [
             ['label' => 'Task control panel', 'url' => ['/tasks/view']],
             ['label' => 'My tasks', 'url' => ['/tasks/clientview']],
+            ['label' => 'New task', 'url' => ['/tasks/new']],
             ['label' => 'Sign Up', 'url' => ['/auth/signup']],
             Yii::$app->user->isGuest ? (
 
