@@ -14,6 +14,7 @@
         <td>Фамилия</td>
         <td>Цена</td>
         <td>Управление заказом</td>
+        <td>Скачать файл</td>
         <td>Состояние заказа</td>
     </tr>
     </thead>
@@ -37,6 +38,7 @@
                 <a href="recover?id=<?= $idDb ?>" class="btn btn-success">Восстановить заказ</a>
                 <?}?>
             </td>
+            <td><a href="/tasks/download?key=<?= $clientTask->file_key ?>"><?= 'Скачать' ?></a></td>
             <td><? if ($clientTask->notary_name != 'no notary' && $clientTask->is_accepted == 1)
                     echo 'Ваша заказ принял нотариус: '.$clientTask->notary_name;
                 else

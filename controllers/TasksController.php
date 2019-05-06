@@ -10,6 +10,7 @@ namespace app\controllers;
 
 
 use app\models\createForm;
+use app\models\UploadForm;
 use app\models\Users;
 use app\models\WorkList;
 use Yii;
@@ -47,6 +48,51 @@ class TasksController extends Controller
         $currTask->modify_date = time();
         $currTask->save();
         $this->redirect('clientview');
+    }
+
+    public function actionUploadfile()
+    {
+        $model = new UploadForm();
+        if (Yii::$app->user->isGuest)
+            $this->redirect('/auth/login', 302);
+
+
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+
+            if (isset($_FILES['UploadForm'])) {
+                $pathToTmpFile = $_FILES['UploadForm']['tmp_name']['userFile'];
+                $pathToNameOfFile = $_FILES['UploadForm']['name']['userFile'];
+                $pathToUploadDir = '../uploads/';
+                $name = md5(time() . rand(1, 1000) . $pathToNameOfFile);
+                $key = $name[0] . $name[1] . $name[2] . $name[3] . $name[4] . $name[5] . $name[6] . $name[7];
+                // Yii::$app->session->open();
+                //Yii::$app->session->set('keyLink', $key);
+                $ext = explode('.', $pathToNameOfFile);
+                $ext = $ext[count($ext) - 1];
+                $pathOld = $pathToUploadDir . $name[0] . '/' . $name[1] . '/';//;
+                $path = str_replace('\\', '/', $pathOld);
+                $link = $path . $name;
+                //$this->Files->uploadFile($link, $key, $ext);
+                if (!file_exists($path)) {
+                    mkdir($path, 0777, true);
+                }
+                move_uploaded_file($pathToTmpFile,
+                    $path . '/' . $name . '.' . $ext);
+                if (file_exists($path)) {
+                    $id = Yii::$app->request->get('id');
+                    $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+                    $currTask->file_link = $link;
+                    $currTask->file_key = $key;
+                    $currTask->modify_date = time();
+                    $currTask->save();
+                    return $this->redirect('/tasks/view');
+                }
+
+            }
+
+        }
+        return $this->render('uploadfile', ['model' => $model]);
     }
 
     public function actionRecover()
@@ -112,6 +158,7 @@ class TasksController extends Controller
         return $this->redirect('/tasks/view');
 
     }
+
     /**
      * @return string
      */
@@ -129,7 +176,7 @@ class TasksController extends Controller
                     $this->redirect('new');
                     exit();
                 }
-                $this->upload($pathToNameOfFile,$pathToTmpFile ,$pathToUploadDir,$model);
+                $this->upload($pathToNameOfFile, $pathToTmpFile, $pathToUploadDir, $model);
             }
         }
         $model->name = '';
@@ -161,7 +208,7 @@ class TasksController extends Controller
         }
     }
 
-    private function upload($pathToNameOfFile,$pathToTmpFile,$pathToUploadDir,$model)
+    private function upload($pathToNameOfFile, $pathToTmpFile, $pathToUploadDir, $model)
     {
         $name = md5(time() . rand(1, 1000) . $pathToNameOfFile);
         $key = $name[0] . $name[1] . $name[2] . $name[3] . $name[4] . $name[5] . $name[6] . $name[7];
