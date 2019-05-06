@@ -13,7 +13,7 @@ use Yii;
  * @property string $file_link
  * @property string $name
  * @property string $sur_name
- * @property string $price
+ * @property int $price
  * @property int $creation_date
  * @property int $modify_date
  * @property int $deadline_date
@@ -21,6 +21,7 @@ use Yii;
  * @property int $is_accepted
  * @property string $extension
  * @property int $is_deleted
+ * @property int $notary_id
  *
  * @property Users $user
  */
@@ -40,11 +41,11 @@ class WorkList extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'file_key', 'file_link', 'name', 'sur_name', 'price', 'creation_date', 'modify_date', 'deadline_date', 'notary_name', 'is_accepted', 'extension', 'is_deleted'], 'required'],
-            [['user_id', 'creation_date', 'modify_date', 'deadline_date', 'is_accepted', 'is_deleted'], 'integer'],
+            [['user_id', 'file_key', 'file_link', 'name', 'sur_name', 'price', 'creation_date', 'modify_date', 'deadline_date', 'notary_name', 'is_accepted', 'extension', 'is_deleted', 'notary_id'], 'required'],
+            [['user_id', 'price', 'creation_date', 'modify_date', 'deadline_date', 'is_accepted', 'is_deleted', 'notary_id'], 'integer'],
             [['file_key', 'extension'], 'string', 'max' => 10],
             [['file_link'], 'string', 'max' => 250],
-            [['name', 'sur_name', 'price', 'notary_name'], 'string', 'max' => 50],
+            [['name', 'sur_name', 'notary_name'], 'string', 'max' => 50],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
@@ -69,6 +70,7 @@ class WorkList extends \yii\db\ActiveRecord
             'is_accepted' => 'Is Accepted',
             'extension' => 'Extension',
             'is_deleted' => 'Is Deleted',
+            'notary_id' => 'Notary ID',
         ];
     }
 

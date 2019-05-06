@@ -1,5 +1,8 @@
 <?
 /** @var $allTasks  */
+
+use yii\bootstrap\Alert;
+
 ?>
 <html>
 <head>
@@ -25,6 +28,7 @@
 
         $idDb = $allTasks[$i]->id;
         $i++;
+
         if($allTask->is_deleted == 0){
     ?>
     <tr>
@@ -41,9 +45,12 @@
         <td>
             <?if($allTask->is_accepted == 0){?>
             <a href="accept?id=<?= $idDb ?>" class="btn btn-success">Принять заказ</a>
-        <?}else{?>
+        <?}elseif($allTask->is_accepted == 1 && $allTask->notary_id == Yii::$app->session->get('__id')){?>
             <a href="deny?id=<?= $idDb ?>" class="btn btn-danger">Отказаться</a>
-            <?}?>
+            <?}else{?>
+             <a disabled="disabled" class="btn btn-success">Невозможно принять заказ</a>
+
+                <?}?>
         </td>
         <td><?if($allTask->is_accepted == 1){?>
             <?='Заказ принял нотариус: '.$allTask->notary_name?>

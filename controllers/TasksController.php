@@ -44,6 +44,7 @@ class TasksController extends Controller
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
         $currTask->is_deleted = 1;
         $currTask->is_accepted = 0;
+        $currTask->modify_date = time();
         $currTask->save();
         $this->redirect('clientview');
     }
@@ -55,6 +56,7 @@ class TasksController extends Controller
         $id = Yii::$app->request->get('id');
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
         $currTask->is_deleted = 0;
+        $currTask->modify_date = time();
         $currTask->save();
         $this->redirect('clientview');
     }
@@ -78,7 +80,8 @@ class TasksController extends Controller
     public function actionAccept()
     {
         if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);        $user = Users::getUserBySessionId();
+            $this->redirect('/auth/login', 302);
+        $user = Users::getUserBySessionId();
         if ($user->is_notary != 1) {
             return $this->redirect('/tasks/index');
             //exit();
@@ -86,6 +89,7 @@ class TasksController extends Controller
         $id = Yii::$app->request->get('id');
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
         $currTask->is_accepted = 1;
+        $currTask->notary_id = Yii::$app->session->get('__id');
         $currTask->notary_name = Yii::$app->user->identity->login;
         $currTask->save();
         return $this->redirect('/tasks/view');
@@ -151,11 +155,12 @@ class TasksController extends Controller
                     $newWork->extension = $ext;
                     $newWork->is_accepted = 0;
                     $newWork->notary_name = 'no notary';
+                    $newWork->notary_id = 0;
                     $newWork->is_deleted = 0;
                     $newWork->save();
-                    echo '<pre>';
-                    print_r($newWork->errors);
-                    exit();
+//                    echo '<pre>';
+//                    print_r($newWork->errors);
+//                    exit();
                 }
             }
         }
