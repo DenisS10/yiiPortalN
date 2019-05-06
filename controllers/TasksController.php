@@ -125,46 +125,8 @@ class TasksController extends Controller
                 $pathToTmpFile = $_FILES['createForm']['tmp_name']['userFile'];
                 $pathToNameOfFile = $_FILES['createForm']['name']['userFile'];
                 $pathToUploadDir = '../uploads/';
-                $name = md5(time() . rand(1, 1000) . $pathToNameOfFile);
-                $key = $name[0] . $name[1] . $name[2] . $name[3] . $name[4] . $name[5] . $name[6] . $name[7];
-                // Yii::$app->session->open();
-                //Yii::$app->session->set('keyLink', $key);
-                $ext = explode('.', $pathToNameOfFile);
-                $ext = $ext[count($ext) - 1];
-                $pathOld = $pathToUploadDir . $name[0] . '/' . $name[1] . '/';//;
-                $path = str_replace('\\', '/', $pathOld);
-                $link = $path . $name;
-                //$this->Files->uploadFile($link, $key, $ext);
-                if (!file_exists($path)) {
-                    mkdir($path, 0777, true);
-                }
-                if (!isset($_FILES['createForm']['tmp_name'])) {
-                    $this->redirect('new');
-                    exit();
-                }
-                move_uploaded_file($pathToTmpFile,
-                    $path . '/' . $name . '.' . $ext);
-                if (file_exists($path)) {
-                    $newWork = new WorkList();
-                    $newWork->user_id = Yii::$app->session->get('__id');
-                    $newWork->name = $model->name;
-                    $newWork->sur_name = $model->surName;
-                    $newWork->price = $model->price;
-                    $newWork->creation_date = time();
-                    $newWork->modify_date = 0;
-                    $newWork->deadline_date = 0;
-                    $newWork->file_key = $key;
-                    $newWork->file_link = $link;
-                    $newWork->extension = $ext;
-                    $newWork->is_accepted = 0;
-                    $newWork->notary_name = 'no notary';
-                    $newWork->notary_id = 0;
-                    $newWork->is_deleted = 0;
-                    $newWork->save();
-//                    echo '<pre>';
-//                    print_r($newWork->errors);
-//                    exit();
-                }
+                $this->upload($pathToNameOfFile,$pathToTmpFile ,$pathToUploadDir,$model);
+                
             }
         }
         $model->name = '';
@@ -195,5 +157,50 @@ class TasksController extends Controller
             return $this->redirect('/tasks/view');
         }
     }
+
+    private function upload($pathToNameOfFile,$pathToTmpFile,$pathToUploadDir,$model)
+    {
+        $name = md5(time() . rand(1, 1000) . $pathToNameOfFile);
+        $key = $name[0] . $name[1] . $name[2] . $name[3] . $name[4] . $name[5] . $name[6] . $name[7];
+        // Yii::$app->session->open();
+        //Yii::$app->session->set('keyLink', $key);
+        $ext = explode('.', $pathToNameOfFile);
+        $ext = $ext[count($ext) - 1];
+        $pathOld = $pathToUploadDir . $name[0] . '/' . $name[1] . '/';//;
+        $path = str_replace('\\', '/', $pathOld);
+        $link = $path . $name;
+        //$this->Files->uploadFile($link, $key, $ext);
+        if (!file_exists($path)) {
+            mkdir($path, 0777, true);
+        }
+        if (!isset($_FILES['createForm']['tmp_name'])) {
+            $this->redirect('new');
+            exit();
+        }
+        move_uploaded_file($pathToTmpFile,
+            $path . '/' . $name . '.' . $ext);
+        if (file_exists($path)) {
+            $newWork = new WorkList();
+            $newWork->user_id = Yii::$app->session->get('__id');
+            $newWork->name = $model->name;
+            $newWork->sur_name = $model->surName;
+            $newWork->price = $model->price;
+            $newWork->creation_date = time();
+            $newWork->modify_date = 0;
+            $newWork->deadline_date = 0;
+            $newWork->file_key = $key;
+            $newWork->file_link = $link;
+            $newWork->extension = $ext;
+            $newWork->is_accepted = 0;
+            $newWork->notary_name = 'no notary';
+            $newWork->notary_id = 0;
+            $newWork->is_deleted = 0;
+            $newWork->save();
+//                    echo '<pre>';
+//                    print_r($newWork->errors);
+//                    exit();
+        }
+    }
+
 
 }
