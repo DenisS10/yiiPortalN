@@ -125,8 +125,11 @@ class TasksController extends Controller
                 $pathToTmpFile = $_FILES['createForm']['tmp_name']['userFile'];
                 $pathToNameOfFile = $_FILES['createForm']['name']['userFile'];
                 $pathToUploadDir = '../uploads/';
+                if (!isset($_FILES['createForm']['tmp_name'])) {
+                    $this->redirect('new');
+                    exit();
+                }
                 $this->upload($pathToNameOfFile,$pathToTmpFile ,$pathToUploadDir,$model);
-                
             }
         }
         $model->name = '';
@@ -173,10 +176,6 @@ class TasksController extends Controller
         if (!file_exists($path)) {
             mkdir($path, 0777, true);
         }
-        if (!isset($_FILES['createForm']['tmp_name'])) {
-            $this->redirect('new');
-            exit();
-        }
         move_uploaded_file($pathToTmpFile,
             $path . '/' . $name . '.' . $ext);
         if (file_exists($path)) {
@@ -196,9 +195,6 @@ class TasksController extends Controller
             $newWork->notary_id = 0;
             $newWork->is_deleted = 0;
             $newWork->save();
-//                    echo '<pre>';
-//                    print_r($newWork->errors);
-//                    exit();
         }
     }
 
