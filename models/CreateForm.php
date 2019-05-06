@@ -29,7 +29,7 @@ class createForm extends Model
             [['name','surName','price'],'string','max' => 50],
             [['deadline'], 'string','max' => 50],
             [['userFile'], 'file', 'skipOnEmpty' => true,'extensions' => 'PDF','maxFiles' => 5],
-
+            //[['deadline'], 'date', 'format' => 'php:d.m.Y H:i']
         ];
     }
 

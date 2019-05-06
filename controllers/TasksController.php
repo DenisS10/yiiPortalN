@@ -26,6 +26,7 @@ class TasksController extends Controller
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
 
+
         return $this->render('index');
     }
 
@@ -230,10 +231,10 @@ class TasksController extends Controller
             $newWork->user_id = Yii::$app->session->get('__id');
             $newWork->name = $model->name;
             $newWork->sur_name = $model->surName;
-            $newWork->price = $model->price;
+            $newWork->price = intval($model->price);
             $newWork->creation_date = time();
             $newWork->modify_date = 0;
-            $newWork->deadline_date = 0;
+            $newWork->deadline_date = strtotime($model->deadline);
             $newWork->file_key = $key;
             $newWork->file_link = $link;
             $newWork->extension = $ext;
