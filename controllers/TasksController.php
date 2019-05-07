@@ -35,6 +35,8 @@ class TasksController extends Controller
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
         $clientTasks = WorkList::getTasksBySessionId();
+        if(!$clientTasks)
+            exit();
         return $this->render('viewclient', ['clientTasks' => $clientTasks]);
     }
 
@@ -44,6 +46,8 @@ class TasksController extends Controller
             $this->redirect('/auth/login', 302);
         $id = Yii::$app->request->get('id');
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+        if(!$currTask)
+            exit();
         if($currTask->is_deleted == 0) {
             $currTask->is_deleted = 1;
             $currTask->is_accepted = 0;
@@ -123,6 +127,8 @@ class TasksController extends Controller
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
         $user = Users::getUserBySessionId();
+        if(!$user)
+            exit();
         if ($user->is_notary != 1) {
             return $this->redirect('/tasks/index');
             //exit();
@@ -154,6 +160,8 @@ class TasksController extends Controller
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
         $id = Yii::$app->request->get('id');
+        if(!$id)
+            exit();
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
         if($currTask->is_ready == 0)
             $currTask->is_ready = 1;
@@ -163,17 +171,21 @@ class TasksController extends Controller
         return $this->redirect('/tasks/view');
     }
 
-    public function actionStatus() //отказ от работы
+    public function actionStatus() //Принять и отказаться от работы
     {
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
         $user = Users::getUserBySessionId();
+        if(!$user)
+            exit();
         if ($user->is_notary != 1) {
             return $this->redirect('/tasks/index');
             //exit();
         }
         $id = Yii::$app->request->get('id');
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+        if(!$currTask)
+            exit();
         if($currTask->is_accepted == 1) {
             $currTask->is_accepted = 0;
             $currTask->notary_name = 'no notary';
@@ -223,6 +235,8 @@ class TasksController extends Controller
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
         $saveFile = WorkList::find()->andWhere(['file_key' => $key])->one();
+        if(!$saveFile)
+            exit();
         if ($saveFile == null)
             exit();
         $pathOld = __DIR__ . '/' . $saveFile->file_link . '.' . $saveFile->extension;
