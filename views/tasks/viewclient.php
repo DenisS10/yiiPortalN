@@ -48,7 +48,10 @@
         <td>             <?
         if ($clientTask->is_ready == 1)
             echo 'Заказ готов!';
-        elseif ($clientTask->is_ready == 0)
+        elseif ($clientTask->is_ready == 0 && $clientTask->is_accepted == 1)
+            echo 'Ожидайте, ваш заказ выполняется.';
+        else
+            echo 'Ваш заказ еще не принят';
             ?></td>
             </tr>
         <? } ?>
