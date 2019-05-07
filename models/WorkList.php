@@ -22,6 +22,7 @@ use Yii;
  * @property string $extension
  * @property int $is_deleted
  * @property int $notary_id
+ * @property int $is_ready
  *
  * @property Users $user
  */
@@ -41,8 +42,8 @@ class WorkList extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'file_key', 'file_link', 'name', 'sur_name', 'price', 'creation_date', 'modify_date', 'deadline_date', 'notary_name', 'is_accepted', 'extension', 'is_deleted', 'notary_id'], 'required'],
-            [['user_id', 'price', 'creation_date', 'modify_date', 'deadline_date', 'is_accepted', 'is_deleted', 'notary_id'], 'integer'],
+            [['user_id', 'file_key', 'file_link', 'name', 'sur_name', 'price', 'creation_date', 'modify_date', 'deadline_date', 'notary_name', 'is_accepted', 'extension', 'is_deleted', 'notary_id', 'is_ready'], 'required'],
+            [['user_id', 'price', 'creation_date', 'modify_date', 'deadline_date', 'is_accepted', 'is_deleted', 'notary_id', 'is_ready'], 'integer'],
             [['file_key', 'extension'], 'string', 'max' => 10],
             [['file_link'], 'string', 'max' => 250],
             [['name', 'sur_name', 'notary_name'], 'string', 'max' => 50],
@@ -71,6 +72,7 @@ class WorkList extends \yii\db\ActiveRecord
             'extension' => 'Extension',
             'is_deleted' => 'Is Deleted',
             'notary_id' => 'Notary ID',
+            'is_ready' => 'Is Ready',
         ];
     }
 

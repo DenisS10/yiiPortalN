@@ -15,10 +15,6 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'deadline')->widget(\yii\widgets\MaskedInput::className(), [
         'mask' => '99.99.2099 99:99',
     ]) ?>
-    <?= $form->field($model, 'price')->widget(\yii\widgets\MaskedInput::className(), [
-        'mask' => '99',
-    ]) ?>
-
 <!--    --><?//= $form->field($model,'price');?>
     <?= $form->field($model, 'userFile')->fileInput() ?>
 

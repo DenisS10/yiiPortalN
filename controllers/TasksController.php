@@ -44,19 +44,36 @@ class TasksController extends Controller
             $this->redirect('/auth/login', 302);
         $id = Yii::$app->request->get('id');
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
-        $currTask->is_deleted = 1;
-        $currTask->is_accepted = 0;
-        $currTask->modify_date = time();
+        if($currTask->is_deleted == 0) {
+            $currTask->is_deleted = 1;
+            $currTask->is_accepted = 0;
+            $currTask->modify_date = time();
+        }
+        elseif ($currTask->is_deleted == 1){
+            $currTask->is_deleted = 0;
+            $currTask->modify_date = time();
+        }
         $currTask->save();
         $this->redirect('clientview');
     }
+
+//    public function actionRecover()
+//    {
+//        if (Yii::$app->user->isGuest)
+//            $this->redirect('/auth/login', 302);
+//        $id = Yii::$app->request->get('id');
+//        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+//        $currTask->is_deleted = 0;
+//        $currTask->modify_date = time();
+//        $currTask->save();
+//        $this->redirect('clientview');
+//    }
 
     public function actionUploadfile()
     {
         $model = new UploadForm();
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
-
 
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
@@ -96,17 +113,7 @@ class TasksController extends Controller
         return $this->render('uploadfile', ['model' => $model]);
     }
 
-    public function actionRecover()
-    {
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
-        $id = Yii::$app->request->get('id');
-        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
-        $currTask->is_deleted = 0;
-        $currTask->modify_date = time();
-        $currTask->save();
-        $this->redirect('clientview');
-    }
+
 
     /**
      * @return string
@@ -124,25 +131,39 @@ class TasksController extends Controller
         return $this->render('viewall', ['allTasks' => $allTasks]);
     }
 
-    public function actionAccept()
+//    public function actionAccept()
+//    {
+//        if (Yii::$app->user->isGuest)
+//            $this->redirect('/auth/login', 302);
+//        $user = Users::getUserBySessionId();
+//        if ($user->is_notary != 1) {
+//            return $this->redirect('/tasks/index');
+//            //exit();
+//        }
+//        $id = Yii::$app->request->get('id');
+//        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+//        $currTask->is_accepted = 1;
+//        $currTask->notary_id = Yii::$app->session->get('__id');
+//        $currTask->notary_name = Yii::$app->user->identity->login;
+//        $currTask->save();
+//        return $this->redirect('/tasks/view');
+//    }
+
+    public function actionReady()
     {
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
-        $user = Users::getUserBySessionId();
-        if ($user->is_notary != 1) {
-            return $this->redirect('/tasks/index');
-            //exit();
-        }
         $id = Yii::$app->request->get('id');
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
-        $currTask->is_accepted = 1;
-        $currTask->notary_id = Yii::$app->session->get('__id');
-        $currTask->notary_name = Yii::$app->user->identity->login;
+        if($currTask->is_ready == 0)
+            $currTask->is_ready = 1;
+        elseif($currTask->is_ready == 1)
+            $currTask->is_ready = 0;
         $currTask->save();
         return $this->redirect('/tasks/view');
     }
 
-    public function actionDeny() //отказ от работы
+    public function actionStatus() //отказ от работы
     {
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
@@ -153,11 +174,17 @@ class TasksController extends Controller
         }
         $id = Yii::$app->request->get('id');
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
-        $currTask->is_accepted = 0;
-        $currTask->notary_name = 'no notary';
+        if($currTask->is_accepted == 1) {
+            $currTask->is_accepted = 0;
+            $currTask->notary_name = 'no notary';
+        }
+        elseif ($currTask->is_accepted == 0) {
+            $currTask->is_accepted = 1;
+            $currTask->notary_id = Yii::$app->session->get('__id');
+            $currTask->notary_name = Yii::$app->user->identity->login;
+        }
         $currTask->save();
         return $this->redirect('/tasks/view');
-
     }
 
     /**
@@ -226,12 +253,13 @@ class TasksController extends Controller
         }
         move_uploaded_file($pathToTmpFile,
             $path . '/' . $name . '.' . $ext);
+
         if (file_exists($path)) {
             $newWork = new WorkList();
             $newWork->user_id = Yii::$app->session->get('__id');
-            $newWork->name = $model->name;
-            $newWork->sur_name = $model->surName;
-            $newWork->price = intval($model->price);
+            $newWork->name = trim($model->name);
+            $newWork->sur_name = trim($model->surName);
+//            $newWork->price = intval($model->price);
             $newWork->creation_date = time();
             $newWork->modify_date = 0;
             $newWork->deadline_date = strtotime($model->deadline);
@@ -242,6 +270,7 @@ class TasksController extends Controller
             $newWork->notary_name = 'no notary';
             $newWork->notary_id = 0;
             $newWork->is_deleted = 0;
+            $newWork->is_ready = 0;
             $newWork->save();
         }
     }
