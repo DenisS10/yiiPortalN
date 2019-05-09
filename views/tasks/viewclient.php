@@ -5,6 +5,17 @@
 
 </head>
 <body>
+<?if(Yii::$app->session->hasFlash('notask')) {?>
+    <div style="width: 50%" class="alert alert-danger" role="alert">
+        <?=Yii::$app->session->getFlash('notask')?>
+    </div>
+<?}?>
+<?if(Yii::$app->session->hasFlash('noid')) {?>
+    <div style="width: 50%" class="alert alert-danger" role="alert">
+        <?=Yii::$app->session->getFlash('noid')?>
+    </div>
+<?}?>
+
 <table class="table table-bordered">
     <thead>
     <tr>

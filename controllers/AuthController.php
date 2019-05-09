@@ -86,7 +86,6 @@ class AuthController extends Controller
                     $newUser->modify_date = 0;
                     $newUser->password = $_password;
                     $newUser->creation_date = time();
-                    //$checkNotary = Yii::$app->request->post();
                     $newUser->is_notary = $model->isNotary;
                     $newUser->save();
                     return $this->redirect('/auth/login');

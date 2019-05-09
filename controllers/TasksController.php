@@ -19,11 +19,11 @@ use yii\web\Controller;
 class TasksController extends Controller
 {
 
+
+
     /**
      * @return string
      */
-
-
     public function actionIndex()
     {
         if (Yii::$app->user->isGuest)
@@ -39,8 +39,8 @@ class TasksController extends Controller
             $this->redirect('/auth/login', 302);
         $user = Users::getUserBySessionId();
         if (!$user) {
-
-            exit();
+            Yii::$app->session->setFlash('nouser', 'Такого пользователя не существует!');
+            return $this->redirect('/tasks/view');
         }
         if ($user->is_notary != 1) {
             return $this->redirect('/tasks/index');
@@ -50,8 +50,10 @@ class TasksController extends Controller
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
         if ($currTask->notary_id == Yii::$app->user->id) {
 
-            if (!$currTask)
-                exit();
+            if (!$currTask){
+                Yii::$app->session->setFlash('notask','Данного заказа не существует!');
+                return $this->redirect('clientview');
+            }
             if ($currTask->is_accepted == 1) {
                 $currTask->is_accepted = 0;
                 $currTask->notary_name = 'no notary';
@@ -71,8 +73,10 @@ class TasksController extends Controller
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
         $clientTasks = WorkList::getTasksBySessionId();
-        if (!$clientTasks)
-            exit();
+        if (!$clientTasks){
+            Yii::$app->session->setFlash('notask','Данного заказа не существует!');
+            return $this->redirect('viewclient');
+        }
         return $this->render('viewclient', ['clientTasks' => $clientTasks]);
     }
 
@@ -82,8 +86,10 @@ class TasksController extends Controller
             $this->redirect('/auth/login', 302);
         $id = Yii::$app->request->get('id');
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
-        if (!$currTask)
-            exit();
+        if (!$currTask){
+            Yii::$app->session->setFlash('notask','Данного заказа не существует!');
+            return $this->redirect('clientview');
+        }
         if (Yii::$app->user->id == $currTask->user_id) {
             if ($currTask->is_deleted == 0) {
                 $currTask->is_deleted = 1;
@@ -96,7 +102,7 @@ class TasksController extends Controller
         }
 
         $currTask->save();
-        $this->redirect('clientview');
+       return $this->redirect('clientview');
     }
 
 //    public function actionRecover()
@@ -121,6 +127,10 @@ class TasksController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $id = Yii::$app->request->get('id');
             $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+            if (!$currTask){
+                Yii::$app->session->setFlash('notask','Данного заказа не существует!');
+                return $this->redirect('view');
+            }
             if ($currTask->notary_id == Yii::$app->user->id) {
                 if (isset($_FILES['UploadForm'])) {
                     $pathToTmpFile = $_FILES['UploadForm']['tmp_name']['userFile'];
@@ -183,8 +193,10 @@ class TasksController extends Controller
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
         $id = Yii::$app->request->get('id');
-        if (!$id)
-            exit();
+        if (!$id){
+            Yii::$app->session->setFlash('noid','Повторите попытку!');
+            return $this->redirect('/tasks/view');
+            }
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
         if ($currTask->notary_id == Yii::$app->user->id) {
             if ($currTask->is_ready == 0)
@@ -277,6 +289,7 @@ class TasksController extends Controller
             $newWork->deadline_date = strtotime($model->deadline);
             $newWork->file_key = $key;
             $newWork->file_link = $link;
+            $newWork->extension = $ext;
             $newWork->extension = $ext;
             $newWork->is_accepted = 0;
             $newWork->notary_name = 'no notary';
