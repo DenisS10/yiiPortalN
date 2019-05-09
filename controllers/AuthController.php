@@ -24,17 +24,7 @@ class AuthController extends Controller
      */
     public function actionIndex()
     {
-//        if (!Yii::$app->session->get('auth') || Yii::$app->session->get('auth') != 'ok')
-//            $this->redirect('login');
-//        Users::findByLogin('www');
-//        exit();
-//        Users::getLoginById(76);
-//        Users::getPassById(76);
-//        return $this->render('index', [
-//            'model' => '',
-//        ]);
-        //$this->getUser();
-        // echo Yii::$app->security->generatePasswordHash('das');
+
     }
 
 
@@ -51,8 +41,15 @@ class AuthController extends Controller
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $user = Users::findByLogin($model->login);
-            if (!$user)
-                exit();
+
+            if (!$user) {
+                Yii::$app->session->setFlash('nouser', 'Такого пользователя не существует!');
+                //sleep(5);
+                return $this->render('login', [
+                    'model' => $model,
+                ]);
+            }
+
 
             if ($user->is_notary == 1) { /* TODO: Сделать отдельный интерфейс для нотариусов */
                 if (Yii::$app->security->validatePassword($model->password, $user->password))
@@ -92,7 +89,8 @@ class AuthController extends Controller
                     //$checkNotary = Yii::$app->request->post();
                     $newUser->is_notary = $model->isNotary;
                     $newUser->save();
-                    $this->refresh();
+                    return $this->redirect('/auth/login');
+
                     // $newUser->errors;
                 }
             }
@@ -140,27 +138,5 @@ class AuthController extends Controller
         $this->redirect('login');
 
     }
-    /*    public function getTasks()
-        {
-            return $this->hasMany(Task::className(), ['user_id' => 'id']);
-        }
 
-        public static function getPassById($id)
-        {
-            return Users::find()->andWhere(['id' => $id])->all()[0]->password;
-        }
-        public static function getLoginById($id)
-        {
-            return Users::find()->andWhere(['id' => $id])->all()[0]->login;
-        }
-        public static function findByLogin($login)
-        {
-            return Users::find()->andWhere(['login' => $login])->all()[0];
-        }
-
-        public static function getUserBySessionId()
-        {
-            $id = Yii::$app->session->get('id');
-            return Users::find()->andWhere(['id' => $id])->one();
-        }*/
 }

@@ -18,9 +18,12 @@ use yii\web\Controller;
 
 class TasksController extends Controller
 {
+
     /**
      * @return string
      */
+
+
     public function actionIndex()
     {
         if (Yii::$app->user->isGuest)
@@ -30,33 +33,68 @@ class TasksController extends Controller
         return $this->render('index');
     }
 
+    public function actionStatus() //Принять и отказаться от работы  TODO:Перенести свойства delete ready в статус
+    {
+        if (Yii::$app->user->isGuest)
+            $this->redirect('/auth/login', 302);
+        $user = Users::getUserBySessionId();
+        if (!$user) {
+
+            exit();
+        }
+        if ($user->is_notary != 1) {
+            return $this->redirect('/tasks/index');
+            //exit();
+        }
+        $id = Yii::$app->request->get('id');
+        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+        if ($currTask->notary_id == Yii::$app->user->id) {
+
+            if (!$currTask)
+                exit();
+            if ($currTask->is_accepted == 1) {
+                $currTask->is_accepted = 0;
+                $currTask->notary_name = 'no notary';
+            } elseif ($currTask->is_accepted == 0) {
+                $currTask->is_accepted = 1;
+                $currTask->notary_id = Yii::$app->user->id;
+                $currTask->notary_name = Yii::$app->user->identity->login;
+            }
+
+            $currTask->save();
+        }
+        return $this->redirect('/tasks/view');
+    }
+
     public function actionClientview()
     {
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
         $clientTasks = WorkList::getTasksBySessionId();
-        if(!$clientTasks)
+        if (!$clientTasks)
             exit();
         return $this->render('viewclient', ['clientTasks' => $clientTasks]);
     }
 
-    public function actionDelete()
+    public function actionClientstatus()
     {
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
         $id = Yii::$app->request->get('id');
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
-        if(!$currTask)
+        if (!$currTask)
             exit();
-        if($currTask->is_deleted == 0) {
-            $currTask->is_deleted = 1;
-            $currTask->is_accepted = 0;
-            $currTask->modify_date = time();
+        if (Yii::$app->user->id == $currTask->user_id) {
+            if ($currTask->is_deleted == 0) {
+                $currTask->is_deleted = 1;
+                $currTask->is_accepted = 0;
+                $currTask->modify_date = time();
+            } elseif ($currTask->is_deleted == 1) {
+                $currTask->is_deleted = 0;
+                $currTask->modify_date = time();
+            }
         }
-        elseif ($currTask->is_deleted == 1){
-            $currTask->is_deleted = 0;
-            $currTask->modify_date = time();
-        }
+
         $currTask->save();
         $this->redirect('clientview');
     }
@@ -81,34 +119,37 @@ class TasksController extends Controller
 
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $id = Yii::$app->request->get('id');
+            $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+            if ($currTask->notary_id == Yii::$app->user->id) {
+                if (isset($_FILES['UploadForm'])) {
+                    $pathToTmpFile = $_FILES['UploadForm']['tmp_name']['userFile'];
+                    $pathToNameOfFile = $_FILES['UploadForm']['name']['userFile'];
+                    $pathToUploadDir = '../uploads/';
+                    $name = md5(time() . rand(1, 1000) . $pathToNameOfFile);
+                    $key = $name[0] . $name[1] . $name[2] . $name[3] . $name[4] . $name[5] . $name[6] . $name[7];
+                    // Yii::$app->session->open();
+                    //Yii::$app->session->set('keyLink', $key);
+                    $ext = explode('.', $pathToNameOfFile);
+                    $ext = $ext[count($ext) - 1];
+                    $pathOld = $pathToUploadDir . $name[0] . '/' . $name[1] . '/';//;
+                    $path = str_replace('\\', '/', $pathOld);
+                    $link = $path . $name;
+                    //$this->Files->uploadFile($link, $key, $ext);
+                    if (!file_exists($path)) {
+                        mkdir($path, 0777, true);
+                    }
+                    move_uploaded_file($pathToTmpFile,
+                        $path . '/' . $name . '.' . $ext);
+                    if (file_exists($path)) {
 
-            if (isset($_FILES['UploadForm'])) {
-                $pathToTmpFile = $_FILES['UploadForm']['tmp_name']['userFile'];
-                $pathToNameOfFile = $_FILES['UploadForm']['name']['userFile'];
-                $pathToUploadDir = '../uploads/';
-                $name = md5(time() . rand(1, 1000) . $pathToNameOfFile);
-                $key = $name[0] . $name[1] . $name[2] . $name[3] . $name[4] . $name[5] . $name[6] . $name[7];
-                // Yii::$app->session->open();
-                //Yii::$app->session->set('keyLink', $key);
-                $ext = explode('.', $pathToNameOfFile);
-                $ext = $ext[count($ext) - 1];
-                $pathOld = $pathToUploadDir . $name[0] . '/' . $name[1] . '/';//;
-                $path = str_replace('\\', '/', $pathOld);
-                $link = $path . $name;
-                //$this->Files->uploadFile($link, $key, $ext);
-                if (!file_exists($path)) {
-                    mkdir($path, 0777, true);
-                }
-                move_uploaded_file($pathToTmpFile,
-                    $path . '/' . $name . '.' . $ext);
-                if (file_exists($path)) {
-                    $id = Yii::$app->request->get('id');
-                    $currTask = WorkList::find()->andWhere(['id' => $id])->one();
-                    $currTask->file_link = $link;
-                    $currTask->file_key = $key;
-                    $currTask->modify_date = time();
-                    $currTask->save();
-                    return $this->redirect('/tasks/view');
+
+                        $currTask->file_link = $link;
+                        $currTask->file_key = $key;
+                        $currTask->modify_date = time();
+                        $currTask->save();
+                        return $this->redirect('/tasks/view');
+                    }
                 }
 
             }
@@ -116,7 +157,6 @@ class TasksController extends Controller
         }
         return $this->render('uploadfile', ['model' => $model]);
     }
-
 
 
     /**
@@ -127,7 +167,7 @@ class TasksController extends Controller
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
         $user = Users::getUserBySessionId();
-        if(!$user)
+        if (!$user)
             exit();
         if ($user->is_notary != 1) {
             return $this->redirect('/tasks/index');
@@ -137,67 +177,25 @@ class TasksController extends Controller
         return $this->render('viewall', ['allTasks' => $allTasks]);
     }
 
-//    public function actionAccept()
-//    {
-//        if (Yii::$app->user->isGuest)
-//            $this->redirect('/auth/login', 302);
-//        $user = Users::getUserBySessionId();
-//        if ($user->is_notary != 1) {
-//            return $this->redirect('/tasks/index');
-//            //exit();
-//        }
-//        $id = Yii::$app->request->get('id');
-//        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
-//        $currTask->is_accepted = 1;
-//        $currTask->notary_id = Yii::$app->session->get('__id');
-//        $currTask->notary_name = Yii::$app->user->identity->login;
-//        $currTask->save();
-//        return $this->redirect('/tasks/view');
-//    }
 
     public function actionReady()
     {
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
         $id = Yii::$app->request->get('id');
-        if(!$id)
+        if (!$id)
             exit();
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
-        if($currTask->is_ready == 0)
-            $currTask->is_ready = 1;
-        elseif($currTask->is_ready == 1)
-            $currTask->is_ready = 0;
-        $currTask->save();
+        if ($currTask->notary_id == Yii::$app->user->id) {
+            if ($currTask->is_ready == 0)
+                $currTask->is_ready = 1;
+            elseif ($currTask->is_ready == 1)
+                $currTask->is_ready = 0;
+            $currTask->save();
+        }
         return $this->redirect('/tasks/view');
     }
 
-    public function actionStatus() //Принять и отказаться от работы
-    {
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
-        $user = Users::getUserBySessionId();
-        if(!$user)
-            exit();
-        if ($user->is_notary != 1) {
-            return $this->redirect('/tasks/index');
-            //exit();
-        }
-        $id = Yii::$app->request->get('id');
-        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
-        if(!$currTask)
-            exit();
-        if($currTask->is_accepted == 1) {
-            $currTask->is_accepted = 0;
-            $currTask->notary_name = 'no notary';
-        }
-        elseif ($currTask->is_accepted == 0) {
-            $currTask->is_accepted = 1;
-            $currTask->notary_id = Yii::$app->session->get('__id');
-            $currTask->notary_name = Yii::$app->user->identity->login;
-        }
-        $currTask->save();
-        return $this->redirect('/tasks/view');
-    }
 
     /**
      * @return string
@@ -235,7 +233,7 @@ class TasksController extends Controller
         if (Yii::$app->user->isGuest)
             $this->redirect('/auth/login', 302);
         $saveFile = WorkList::find()->andWhere(['file_key' => $key])->one();
-        if(!$saveFile)
+        if (!$saveFile)
             exit();
         if ($saveFile == null)
             exit();

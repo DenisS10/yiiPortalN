@@ -6,6 +6,12 @@ use yii\widgets\ActiveForm;
 
     ?>
 
+
+    <?if(Yii::$app->session->hasFlash('nouser')) {?>
+        <div style="width: 50%" class="alert alert-danger" role="alert">
+            <?=Yii::$app->session->getFlash('nouser')?>
+        </div>
+    <?}?>
 <div style="width: 22%;">
 <? $form = ActiveForm::begin()?>
 <?= $form->field($model,'login');?>

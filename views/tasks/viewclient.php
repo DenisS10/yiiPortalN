@@ -33,9 +33,9 @@
         <td><?= $clientTask->sur_name ?></td>
         <!--            <td>--><? //= $clientTask->price ?><!--</td>-->
         <td><? if ($clientTask->is_deleted == 0) { ?>
-                <a href="delete?id=<?= $idDb ?>" class="btn btn-danger">Отозвать заказ</a>
+                <a href="clientstatus?id=<?= $idDb ?>" class="btn btn-danger">Отозвать заказ</a>
             <? } else { ?>
-                <a href="delete?id=<?= $idDb ?>" class="btn btn-success">Восстановить заказ</a>
+                <a href="clientstatus?id=<?= $idDb ?>" class="btn btn-success">Восстановить заказ</a>
             <? } ?>
         </td>
         <td><a href="/tasks/download?key=<?= $clientTask->file_key ?>"><?= 'Скачать' ?></a></td>

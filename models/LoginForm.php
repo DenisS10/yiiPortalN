@@ -15,6 +15,7 @@ class LoginForm extends Model
 {
     public $login;
     public $password;
+   // public $loginErrors;
 
 
 
@@ -27,6 +28,7 @@ class LoginForm extends Model
             ['login','required','message' => 'Необходимо заполнить поле',],
             //['password','string','min' => 3,'tooShort' => 'You nickname is very short'],
             ['password','required','message' => 'Необходимо заполнить поле'],
+          //  ['$loginErrors','string']
         ];
    }
 

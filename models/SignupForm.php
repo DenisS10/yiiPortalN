@@ -29,6 +29,7 @@ class SignupForm extends Model
 //            ['passwordReload','compareAttribute'=>'password'],
             ['isNotary','required','message' => 'Необходимо заполнить поле'],
            // ['password', 'compare', 'compareAttribute' => 'passwordReload'],
+            ['passwordReload', 'compare', 'compareAttribute' => 'password','message' => 'Пароли должны совпадать'],
         ];
     }
 
