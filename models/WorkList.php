@@ -43,8 +43,8 @@ class WorkList extends ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'file_key', 'file_link', 'name', 'sur_name', 'price', 'creation_date', 'modify_date', 'deadline_date', 'notary_name', 'is_accepted', 'extension', 'is_deleted', 'notary_id', 'is_ready'], 'required'],
-            [['user_id', 'price', 'creation_date', 'modify_date', 'deadline_date', 'is_accepted', 'is_deleted', 'notary_id', 'is_ready'], 'integer'],
+            [['user_id', 'file_key', 'file_link', 'name', 'sur_name', 'creation_date', 'modify_date', 'deadline_date', 'notary_name', 'is_accepted', 'extension', 'is_deleted', 'notary_id', 'is_ready'], 'required'],
+            [['user_id', 'creation_date', 'modify_date', 'deadline_date', 'is_accepted', 'is_deleted', 'notary_id', 'is_ready'], 'integer'],
             [['file_key', 'extension'], 'string', 'max' => 10],
             [['file_link'], 'string', 'max' => 250],
             [['name', 'sur_name', 'notary_name'], 'string', 'max' => 50],

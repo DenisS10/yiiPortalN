@@ -17,7 +17,7 @@ class createForm extends Model
     public $surName;
     public $deadline;
     public $userFile;
-    public $price;
+
    // public $needDocVerify;
 
 
@@ -25,8 +25,8 @@ class createForm extends Model
     public function rules()
     {
         return[
-            [['name', 'surName','deadline','price'], 'required','message' => 'Необходимо заполнить поле'],
-            [['name','surName','price'],'string','max' => 50],
+            [['name', 'surName','deadline'], 'required','message' => 'Необходимо заполнить поле'],
+            [['name','surName'],'string','max' => 50],
             [['deadline'], 'string','max' => 50],
             [['userFile'], 'file', 'skipOnEmpty' => true,'extensions' => 'PDF','maxFiles' => 5],
             //[['deadline'], 'date', 'format' => 'php:d.m.Y H:i']
@@ -40,7 +40,7 @@ class createForm extends Model
           'surName' => 'Фамилия',
           'deadline' => 'Крайний срок',
           'userFile' => 'Документ',
-          'price' => 'Цена работы',
+//          'price' => 'Цена работы',
 
         ];
     }

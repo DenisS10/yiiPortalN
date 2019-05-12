@@ -47,6 +47,8 @@ class TasksController extends Controller
         }
         $id = Yii::$app->request->get('id');
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
+        $notary = Users::find()->andWhere(['id'=> Yii::$app->user->id])->one();
+
         if ($currTask->notary_id == Yii::$app->user->id) {
 
             if (!$currTask){
@@ -55,15 +57,18 @@ class TasksController extends Controller
             }
             if ($currTask->is_accepted == 1) {
                 $currTask->is_accepted = 0;
+                $currTask->notary_id = 0;
                 $currTask->notary_name = 'no notary';
-            } elseif ($currTask->is_accepted == 0) {
-                $currTask->is_accepted = 1;
-                $currTask->notary_id = Yii::$app->user->id;
-                $currTask->notary_name = Yii::$app->user->identity->login;
+                $currTask->save();
             }
 
-            $currTask->save();
-        }
+        }  elseif ($currTask->is_accepted == 0 && $currTask->notary_id == 0 && $notary->is_notary == 1) {
+        $currTask->is_accepted = 1;
+        $currTask->notary_id = Yii::$app->user->id;
+        $currTask->notary_name = Yii::$app->user->identity->login;
+        $currTask->save();
+    }
+
         return $this->redirect('/tasks/view');
     }
 
@@ -104,10 +109,6 @@ class TasksController extends Controller
     public function actionUploadfile()
     {
         $model = new UploadForm();
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
-
-
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $id = Yii::$app->request->get('id');
             $currTask = WorkList::find()->andWhere(['id' => $id])->one();
@@ -200,8 +201,12 @@ class TasksController extends Controller
      */
     public function actionNew()
     {
+
         $model = new createForm();
+
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+
+
             if (isset($_FILES['createForm'])) {
                 $pathToTmpFile = $_FILES['createForm']['tmp_name']['userFile'];
                 $pathToNameOfFile = $_FILES['createForm']['name']['userFile'];
@@ -210,13 +215,13 @@ class TasksController extends Controller
                     $this->redirect('new');
                     exit();
                 }
+
                 $this->upload($pathToNameOfFile, $pathToTmpFile, $pathToUploadDir, $model);
             }
         }
         $model->name = '';
         $model->surName = '';
         $model->deadline = '';
-        $model->price = '';
         return $this->render('create', ['model' => $model]);
     }
 
@@ -268,16 +273,14 @@ class TasksController extends Controller
 
         if (file_exists($path)) {
             $newWork = new WorkList();
-            $newWork->user_id = Yii::$app->session->get('__id');
+            $newWork->user_id = Yii::$app->user->id;
             $newWork->name = trim($model->name);
             $newWork->sur_name = trim($model->surName);
-//            $newWork->price = intval($model->price);
             $newWork->creation_date = time();
             $newWork->modify_date = 0;
             $newWork->deadline_date = strtotime($model->deadline);
             $newWork->file_key = $key;
             $newWork->file_link = $link;
-            $newWork->extension = $ext;
             $newWork->extension = $ext;
             $newWork->is_accepted = 0;
             $newWork->notary_name = 'no notary';
@@ -285,6 +288,8 @@ class TasksController extends Controller
             $newWork->is_deleted = 0;
             $newWork->is_ready = 0;
             $newWork->save();
+
+
         }
     }
 }
