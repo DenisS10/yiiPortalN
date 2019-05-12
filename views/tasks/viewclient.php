@@ -51,7 +51,7 @@
         </td>
         <td><a href="/tasks/download?key=<?= $clientTask->file_key ?>"><?= 'Скачать' ?></a></td>
         <td><? if ($clientTask->notary_name != 'no notary' && $clientTask->is_accepted == 1)
-                echo 'Ваша заказ принял нотариус: ' . $clientTask->notary_name;
+                echo 'Ваш заказ принял нотариус: ' . $clientTask->notary_name;
             else
                 echo 'В данный момент заказ не был принят';
 
