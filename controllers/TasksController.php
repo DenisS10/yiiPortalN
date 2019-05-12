@@ -14,31 +14,34 @@ use app\models\UploadForm;
 use app\models\Users;
 use app\models\WorkList;
 use Yii;
+//use yii\helpers\VarDumper;
 use yii\web\Controller;
 
 class TasksController extends Controller
 {
-
-
-
+    public function __construct($id, $module, $config = [])
+    {
+       // VarDumper::dump([$id, $module, $config]);
+        parent::__construct($id, $module, $config);
+        if (Yii::$app->user->isGuest)
+            return $this->redirect('/auth/login', 302);
+    }
     /**
      * @return string
      */
     public function actionIndex()
     {
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
-
 
         return $this->render('index');
     }
 
     public function actionStatus() //Принять и отказаться от работы  TODO:Перенести свойства delete ready в статус
     {
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
         $user = Users::getUserBySessionId();
-        if (!$user) {
+        if (!$user && Yii::$app->user->isGuest) {
+            Yii::$app->session->setFlash('nouser', 'Такого пользователя не существует!');
+            return $this->redirect('/auth/login');
+        }        if (!$user) {
             Yii::$app->session->setFlash('nouser', 'Такого пользователя не существует!');
             return $this->redirect('/tasks/view');
         }
@@ -70,8 +73,6 @@ class TasksController extends Controller
 
     public function actionClientview()
     {
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
         $clientTasks = WorkList::getTasksBySessionId();
         if (!$clientTasks){
             Yii::$app->session->setFlash('notask','Данного заказа не существует!');
@@ -82,8 +83,6 @@ class TasksController extends Controller
 
     public function actionClientstatus()
     {
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
         $id = Yii::$app->request->get('id');
         $currTask = WorkList::find()->andWhere(['id' => $id])->one();
         if (!$currTask){
@@ -168,17 +167,17 @@ class TasksController extends Controller
         return $this->render('uploadfile', ['model' => $model]);
     }
 
-
     /**
      * @return string
      */
     public function actionView()
     {
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
+
         $user = Users::getUserBySessionId();
-        if (!$user)
-            exit();
+        if (!$user && Yii::$app->user->isGuest)
+            return $this->redirect('/auth/login');
+        if(!$user)
+            exit(/*'Такого пользователя не существует'*/);
         if ($user->is_notary != 1) {
             return $this->redirect('/tasks/index');
             //exit();
@@ -190,8 +189,7 @@ class TasksController extends Controller
 
     public function actionReady()
     {
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
+
         $id = Yii::$app->request->get('id');
         if (!$id){
             Yii::$app->session->setFlash('noid','Повторите попытку!');
@@ -214,8 +212,6 @@ class TasksController extends Controller
      */
     public function actionNew()
     {
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
         $model = new createForm();
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if (isset($_FILES['createForm'])) {
@@ -242,8 +238,6 @@ class TasksController extends Controller
      */
     public function actionDownload($key)
     {
-        if (Yii::$app->user->isGuest)
-            $this->redirect('/auth/login', 302);
         $saveFile = WorkList::find()->andWhere(['file_key' => $key])->one();
         if (!$saveFile)
             exit();
@@ -299,6 +293,4 @@ class TasksController extends Controller
             $newWork->save();
         }
     }
-
-
 }
