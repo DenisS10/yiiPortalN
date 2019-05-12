@@ -7,21 +7,17 @@
  */
 
 namespace app\controllers;
-
-
 use app\models\createForm;
 use app\models\UploadForm;
 use app\models\Users;
 use app\models\WorkList;
 use Yii;
-//use yii\helpers\VarDumper;
 use yii\web\Controller;
 
 class TasksController extends Controller
 {
     public function __construct($id, $module, $config = [])
     {
-       // VarDumper::dump([$id, $module, $config]);
         parent::__construct($id, $module, $config);
         if (Yii::$app->user->isGuest)
             return $this->redirect('/auth/login', 302);
@@ -104,17 +100,6 @@ class TasksController extends Controller
        return $this->redirect('clientview');
     }
 
-//    public function actionRecover()
-//    {
-//        if (Yii::$app->user->isGuest)
-//            $this->redirect('/auth/login', 302);
-//        $id = Yii::$app->request->get('id');
-//        $currTask = WorkList::find()->andWhere(['id' => $id])->one();
-//        $currTask->is_deleted = 0;
-//        $currTask->modify_date = time();
-//        $currTask->save();
-//        $this->redirect('clientview');
-//    }
 
     public function actionUploadfile()
     {
@@ -187,6 +172,9 @@ class TasksController extends Controller
     }
 
 
+    /**
+     * @return \yii\web\Response
+     */
     public function actionReady()
     {
 
@@ -254,6 +242,12 @@ class TasksController extends Controller
         }
     }
 
+    /**
+     * @param $pathToNameOfFile
+     * @param $pathToTmpFile
+     * @param $pathToUploadDir
+     * @param $model
+     */
     private function upload($pathToNameOfFile, $pathToTmpFile, $pathToUploadDir, $model)
     {
         $name = md5(time() . rand(1, 1000) . $pathToNameOfFile);

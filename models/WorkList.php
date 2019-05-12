@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "work_list".
@@ -26,7 +27,7 @@ use Yii;
  *
  * @property Users $user
  */
-class WorkList extends \yii\db\ActiveRecord
+class WorkList extends ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -83,6 +84,7 @@ class WorkList extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Users::className(), ['id' => 'user_id']);
     }
+
     public static function getAllTasks()
     {
         return WorkList::find()->all();
